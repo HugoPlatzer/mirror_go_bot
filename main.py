@@ -9,6 +9,10 @@ class KataCommandFailedException(Exception):
     pass
 
 
+def log_message(message):
+    print(message, file=sys.stderr)
+
+
 def init_state():
     return {"katago_handle": None, "cmdline_args": None}
 
@@ -160,10 +164,18 @@ def generate_move(state, player):
     mirror_score = -mirror_score_opponent
     # print(best_move, best_score, mirror_move, mirror_score)
     mirror_threshold = state["cmdline_args"].mirror_threshold
+    log_message(f"generate_move: best_move={best_move}"
+            f" best_score={best_score:.2f}"
+            f" mirror_move={mirror_move}"
+            f" mirror_score={mirror_score:.2f}"
+            f" score_diff={best_score-mirror_score:.2f}"
+            f" mirror_threshold={mirror_threshold:.2f}")
     if best_score - mirror_score > mirror_threshold:
+        log_message("generate_move: avoiding mirror move")
         return best_move
     else:
-        return mirror_move
+        log_message("generate_move: picking mirror move")
+    return mirror_move
 
 
 def gtp_read_command():
@@ -239,6 +251,8 @@ def gtp_loop(state):
         "play": gtp_handle_play,
         "genmove": gtp_handle_genmove
     }
+    
+    log_message("GTP loop started.")
     while True:
         command_name, command_args = gtp_read_command()
         if command_name == "quit":
@@ -264,6 +278,7 @@ def main():
     parser.add_argument("--mirror-threshold", required=True,
             type=float)
     state["cmdline_args"] = parser.parse_args()
+    log_message("launching katago...")
     katago_launch(state)
     katago_check_ready(state)
     gtp_loop(state)
