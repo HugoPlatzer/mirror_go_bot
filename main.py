@@ -5,6 +5,10 @@ import re
 import string
 
 
+SGF_COL_NAMES = "abcdefghijklmnopqrstuvwxyz"
+GTP_COL_NAMES = "abcdefghjklmnopqrstuvwxyz"
+
+
 class KataCommandFailedException(Exception):
     pass
 
@@ -87,26 +91,26 @@ def katago_analyze(state):
 
 def sgf_to_gtp_coord(boardsize, sgf_coord):
     assert len(sgf_coord) == 2
-    assert sgf_coord[0] in string.ascii_lowercase
-    assert sgf_coord[1] in string.ascii_lowercase
-    col = sgf_coord[0]
-    row = string.ascii_lowercase.index(sgf_coord[1])
-    row = boardsize - row
-    assert row in range(1, boardsize+1)
-    assert col in string.ascii_lowercase[:boardsize]
-    gtp_coord = f"{col}{row}"
+    assert sgf_coord[0] in SGF_COL_NAMES
+    assert sgf_coord[1] in SGF_COL_NAMES
+    col_index = SGF_COL_NAMES.index(sgf_coord[0])
+    row_index = SGF_COL_NAMES.index(sgf_coord[1])
+    gtp_col = GTP_COL_NAMES[col_index]
+    gtp_row = boardsize - row_index
+    assert gtp_row in range(1, boardsize+1)
+    gtp_coord = f"{gtp_col}{gtp_row}"
     return gtp_coord
 
 
 def coord_to_row_col_index(gtp_coord):
-    col_index = string.ascii_lowercase.index(gtp_coord[0])
+    col_index = GTP_COL_NAMES.index(gtp_coord[0])
     row_index = int(gtp_coord[1:]) - 1
     return row_index, col_index
 
 
 def row_col_index_to_coord(row_index, col_index):
     row_str = str(row_index + 1)
-    col_str = string.ascii_lowercase[col_index]
+    col_str = GTP_COL_NAMES[col_index]
     return f"{col_str}{row_str}"
 
 
