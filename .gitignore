@@ -1,1 +1,3 @@
+*.swp
+gtp_logs/
 gtp_bot.sh
